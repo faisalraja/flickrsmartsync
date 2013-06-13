@@ -1,0 +1,11 @@
+README.rst
+setup.cfg
+setup.py
+flickrsmartsync/__init__.py
+flickrsmartsync.egg-info/PKG-INFO
+flickrsmartsync.egg-info/SOURCES.txt
+flickrsmartsync.egg-info/dependency_links.txt
+flickrsmartsync.egg-info/entry_points.txt
+flickrsmartsync.egg-info/not-zip-safe
+flickrsmartsync.egg-info/requires.txt
+flickrsmartsync.egg-info/top_level.txt
