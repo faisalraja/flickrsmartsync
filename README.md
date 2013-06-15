@@ -1,4 +1,4 @@
-**flickrsmartsync** - Sync/backup your photos to flickr easily 
+flickrsmartsync - Sync/backup your photos to flickr easily
 ------------------
 flickrsmartsync is a tool you can use to easily sync up or down your
 photos in a drive/folder to flickr since now it has a free 1TB storage
