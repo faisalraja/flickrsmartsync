@@ -4,18 +4,19 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-version = '0.1.1'
+version = '0.1.2'
+
 
 def main():
     setup(name='flickrsmartsync',
           version=version,
           description="Sync/backup your photos to flickr easily",
-          long_description=open("README.rst").read(),
+          long_description=open("README.md").read(),
           classifiers=[],
           keywords='flickr backup photo sync',
           author='Faisal Raja',
           author_email='support@altlimit.com',
-          url='http://www.altlimit.com/',
+          url='https://github.com/faisalraja/flickrsmartsync',
           license='MIT',
           packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
           include_package_data=True,

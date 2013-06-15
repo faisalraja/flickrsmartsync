@@ -1,4 +1,3 @@
-README.rst
 setup.cfg
 setup.py
 flickrsmartsync/__init__.py
