@@ -8,6 +8,7 @@ you can probably sync all your photo collection.
 Installation
 ---------------
 You need python-pip installed
+
     pip install flickrsmartsync
 
 
