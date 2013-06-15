@@ -23,6 +23,9 @@ Example Usage::
     # start downloading all paths starting with that path
     $ flickrsmartsync --download 2008/2008-01-01
 
+    # for direct python access
+    $ python flickrsmartsync
+
 
 More info
 --------------

@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-version = '0.1.2'
+version = '0.1.4'
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
           packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
           include_package_data=True,
           zip_safe=False,
-          install_requires=['flickrapi>=1.4.2'],
+          install_requires=[],
           entry_points={
               "console_scripts": ['flickrsmartsync = flickrsmartsync:main'],
           },

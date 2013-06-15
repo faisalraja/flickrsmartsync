@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: flickrsmartsync
-Version: 0.1.2
+Version: 0.1.4
 Summary: Sync/backup your photos to flickr easily
 Home-page: https://github.com/faisalraja/flickrsmartsync
 Author: Faisal Raja
@@ -16,6 +16,7 @@ Description: **flickrsmartsync** - Sync/backup your photos to flickr easily
         Installation
         ---------------
         You need python-pip installed
+        
             pip install flickrsmartsync
         
         
@@ -29,6 +30,9 @@ Description: **flickrsmartsync** - Sync/backup your photos to flickr easily
             
             # start downloading all paths starting with that path
             $ flickrsmartsync --download 2008/2008-01-01
+        
+            # for direct python access
+            $ python flickrsmartsync
         
         
         More info

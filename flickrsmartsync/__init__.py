@@ -14,8 +14,8 @@ __author__ = 'faisal'
 def start_sync(sync_path, is_download):
 
     # Put your API & SECRET keys here
-    KEY = ''
-    SECRET = ''
+    KEY = 'f7da21662566bc773c7c750ddf7030f7'
+    SECRET = 'c329cdaf44c6d3f3'
 
     # Common arguments
     args = {'format': 'json', 'nojsoncallback': 1}
@@ -76,9 +76,15 @@ def start_sync(sync_path, is_download):
     # For adding photo to set
     def add_to_photo_set(photo_id, folder):
         # If photoset not found in online map create it else add photo to it
+        # Always upload unix style
+        if '\'' in folder:
+            folder = folder.replace('\'', '/')
+
         if folder not in photo_sets_map:
             photosets_args = args.copy()
-            photosets_args.update({'primary_photo_id': photo_id, 'title': folder.split(os.sep).pop(), 'description': folder})
+            photosets_args.update({'primary_photo_id': photo_id,
+                                   'title': folder.split('/').pop(),
+                                   'description': folder})
             set = json.loads(api.photosets_create(**photosets_args))
             photo_sets_map[folder] = set['photoset']['id']
             print 'Created set [%s] and added photo' % folder
@@ -94,6 +100,10 @@ def start_sync(sync_path, is_download):
     # Get photos in a set
     def get_photos_in_set(folder):
         photos = {}
+        # Always upload unix style
+        if '\'' in folder:
+            folder = folder.replace('\'', '/')
+
         if folder in photo_sets_map:
             photoset_args = args.copy()
             page = 1
@@ -119,6 +129,8 @@ def start_sync(sync_path, is_download):
         for photo_set in photo_sets_map:
             if photo_set and is_download == '.' or is_download != '.' and photo_set.startswith(is_download):
                 folder = photo_set.replace(sync_path, '')
+                print 'Getting photos in set [%s]' % folder
+                photos = get_photos_in_set(folder)
                 # If Uploaded on unix and downloading on windows & vice versa
                 if '/' in folder and os.sep != '/':
                     folder = folder.replace('/', os.sep)
@@ -128,8 +140,6 @@ def start_sync(sync_path, is_download):
                 if not os.path.isdir(folder):
                     os.makedirs(folder)
 
-                print 'Getting photos in set [%s]' % folder
-                photos = get_photos_in_set(folder)
                 for photo in photos:
                     path = os.path.join(folder, photo)
                     if os.path.exists(path):
