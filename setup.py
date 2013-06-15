@@ -4,14 +4,14 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-version = '0.1.6'
+version = '0.1.6.1'
 
 
 def main():
     setup(name='flickrsmartsync',
           version=version,
           description="Sync/backup your photos to flickr easily",
-          long_description=open("README.md").read(),
+          long_description=open('README.md').read(),
           classifiers=[],
           keywords='flickr backup photo sync',
           author='Faisal Raja',

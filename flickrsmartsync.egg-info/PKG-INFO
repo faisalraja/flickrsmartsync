@@ -1,12 +1,12 @@
 Metadata-Version: 1.0
 Name: flickrsmartsync
-Version: 0.1.6
+Version: 0.1.6.1
 Summary: Sync/backup your photos to flickr easily
 Home-page: https://github.com/faisalraja/flickrsmartsync
 Author: Faisal Raja
 Author-email: support@altlimit.com
 License: MIT
-Description: **flickrsmartsync** - Sync/backup your photos to flickr easily 
+Description: flickrsmartsync - Sync/backup your photos to flickr easily
         ------------------
         flickrsmartsync is a tool you can use to easily sync up or down your
         photos in a drive/folder to flickr since now it has a free 1TB storage

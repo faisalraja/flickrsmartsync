@@ -1,1 +1,2 @@
+recursive-include flickrapi *
 include README.md

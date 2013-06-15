@@ -1,10 +1,11 @@
 #
-import argparse
 import HTMLParser
-import sys
 import json
 import os
 import urllib
+
+import argparse
+
 import flickrapi
 
 
