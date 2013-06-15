@@ -13,6 +13,7 @@ __author__ = 'faisal'
 
 
 def start_sync(sync_path, is_download):
+    is_windows = os.name == 'nt'
 
     # Put your API & SECRET keys here
     KEY = 'f7da21662566bc773c7c750ddf7030f7'
@@ -78,8 +79,8 @@ def start_sync(sync_path, is_download):
     def add_to_photo_set(photo_id, folder):
         # If photoset not found in online map create it else add photo to it
         # Always upload unix style
-        if '\'' in folder:
-            folder = folder.replace('\'', '/')
+        if is_windows:
+            folder = folder.replace(os.sep, '/')
 
         if folder not in photo_sets_map:
             photosets_args = args.copy()
@@ -102,8 +103,8 @@ def start_sync(sync_path, is_download):
     def get_photos_in_set(folder):
         photos = {}
         # Always upload unix style
-        if '\'' in folder:
-            folder = folder.replace('\'', '/')
+        if is_windows:
+            folder = folder.replace(os.sep, '/')
 
         if folder in photo_sets_map:
             photoset_args = args.copy()
@@ -133,10 +134,8 @@ def start_sync(sync_path, is_download):
                 print 'Getting photos in set [%s]' % folder
                 photos = get_photos_in_set(folder)
                 # If Uploaded on unix and downloading on windows & vice versa
-                if '/' in folder and os.sep != '/':
+                if is_windows:
                     folder = folder.replace('/', os.sep)
-                elif '\'' in folder and os.sep != '\'':
-                    folder = folder.replace('\'', os.sep)
 
                 if not os.path.isdir(folder):
                     os.makedirs(folder)
@@ -158,7 +157,7 @@ def start_sync(sync_path, is_download):
             print 'Found %s photos' % len(photos)
 
             for photo in photo_sets[photo_set]:
-                if photo in photos:
+                if photo in photos or is_windows and photo.replace(os.sep, '/') in photos:
                     print 'Skipped [%s] already exists in set [%s]' % (photo, folder)
                 else:
                     print 'Uploading [%s] to set [%s]' % (photo, folder)
