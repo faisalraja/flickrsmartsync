@@ -1,34 +1,58 @@
 flickrsmartsync - Sync/backup your photos to flickr easily
-------------------
+**********************************************************
+
 flickrsmartsync is a tool you can use to easily sync up or down your
 photos in a drive/folder to flickr since now it has a free 1TB storage
 you can probably sync all your photo collection.
 
 
-Installation
----------------
-You need python-pip installed
+Install
+=======
 
-    pip install flickrsmartsync
+Simply run the following::
+
+    $ python setup.py install
+
+or `PyPi`_::
+
+    $ pip install flickrsmartsync
 
 
-Example Usage::
+Example Usage
+==============
 
-    # start uploading all photos under that folder
+Both run from source and command line have same parameters::
+
+    start uploading all photos under that folder
     $ flickrsmartsync
 
-    # start downloading all photos on flickr to that folder
+    start downloading all photos on flickr to that folder
     $ flickrsmartsync --download .
     
-    # start downloading all paths starting with that path
+    start downloading all paths starting with that path
     $ flickrsmartsync --download 2008/2008-01-01
 
-    # for direct python access
+    for direct python access
     $ python flickrsmartsync
 
 
-More info
---------------
-[Backup/Sync Your Photos to flickr - Blog Post](http://blog.altlimit.com/2013/05/backupsync-your-photos-to-flickr-script.html)
+Change log
+==========
 
-[Download the egg file](https://pypi.python.org/pypi/flickrsmartsync)
+0.1.7 (2013-06-15)
+
+ * added run from source
+
+0.1 (2013-06-13)
+
+
+Links
+=====
+* `github.com`_ - source code
+* `altlimit.com`_ - website
+* `blog post`_ - blog post
+
+.. _github.com: https://github.com/faisalraja/flickrsmartsync
+.. _PyPi: https://pypi.python.org/pypi/flickrsmartsync
+.. _altlimit.com: http://www.altlimit.com
+.. _blog post: http://blog.altlimit.com/2013/05/backupsync-your-photos-to-flickr-script.html
