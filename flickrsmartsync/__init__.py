@@ -127,7 +127,7 @@ def start_sync(sync_path, cmd_args):
 
                 for photo in photos_in_set['photoset']['photo']:
 
-                    if photo['media'] == 'video' and is_download:
+                    if is_download and photo.get('media') == 'video':
                         # photo_args = args.copy()
                         # photo_args['photo_id'] = photo['id']
                         # sizes = json.loads(api.photos_getSizes(**photo_args))
