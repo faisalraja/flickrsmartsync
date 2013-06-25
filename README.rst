@@ -23,8 +23,10 @@ Example Usage
 
 Both run from source and command line have same parameters::
 
-    start uploading all photos under that folder
+    start uploading all photos/videos under that folder
     $ flickrsmartsync
+    ignore videos for others use --help
+    $ flickrsmartsync --ignore-videos
 
     start downloading all photos on flickr to that folder
     $ flickrsmartsync --download .
