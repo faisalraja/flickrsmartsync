@@ -3,17 +3,17 @@ import HTMLParser
 import json
 import os
 import urllib
-
 import argparse
-
 import flickrapi
-
 
 __author__ = 'faisal'
 
+EXT_IMAGE = ('jpg', 'png', 'jpeg', 'gif', 'bmp')
+EXT_VIDEO = ('avi', 'wmv', 'mov', 'mp4', '3gp', 'ogg', 'ogv')
 
-def start_sync(sync_path, is_download):
+def start_sync(sync_path, cmd_args):
     is_windows = os.name == 'nt'
+    is_download = cmd_args.download
 
     # Put your API & SECRET keys here
     KEY = 'f7da21662566bc773c7c750ddf7030f7'
@@ -41,14 +41,21 @@ def start_sync(sync_path, is_download):
     # Build your local photo sets
     photo_sets = {}
     skips_root = []
-    for r, d, f in os.walk(sync_path):
-        for file in f:
-            if file.lower().split('.').pop() in ('jpg', 'png', 'jpeg', 'gif', 'bmp'):
-                if r == sync_path:
-                    skips_root.append(file)
-                else:
-                    photo_sets.setdefault(r, [])
-                    photo_sets[r].append(file)
+    for r, dirs, files in os.walk(sync_path):
+        files = [f for f in files if not f.startswith('.')]
+        dirs[:] = [d for d in dirs if not d.startswith('.')]
+
+        for file in files:
+            if not file.startswith('.'):
+                ext = file.lower().split('.').pop()
+                if ext in EXT_IMAGE or \
+                   ext in EXT_VIDEO:
+
+                    if r == sync_path:
+                        skips_root.append(file)
+                    else:
+                        photo_sets.setdefault(r, [])
+                        photo_sets[r].append(file)
 
     if skips_root:
         print 'To avoid disorganization on flickr sets root photos are not synced, skipped these photos:', skips_root
@@ -112,14 +119,29 @@ def start_sync(sync_path, is_download):
             while True:
                 photoset_args.update({'photoset_id': photo_sets_map[folder], 'page': page})
                 if is_download:
-                    photoset_args['extras'] = 'url_o'
+                    photoset_args['extras'] = 'url_o,media'
                 page += 1
                 photos_in_set = json.loads(api.photosets_getPhotos(**photoset_args))
                 if photos_in_set['stat'] != 'ok':
                     break
 
                 for photo in photos_in_set['photoset']['photo']:
-                    photos[photo['title']] = photo['url_o'] if is_download else photo['id']
+
+                    if photo['media'] == 'video' and is_download:
+                        # photo_args = args.copy()
+                        # photo_args['photo_id'] = photo['id']
+                        # sizes = json.loads(api.photos_getSizes(**photo_args))
+                        # if sizes['stat'] != 'ok':
+                        #     continue
+                        #
+                        # original = filter(lambda s: s['label'].startswith('Site') and s['media'] == 'video', sizes['sizes']['size'])
+                        # if original:
+                        #     photos[photo['title']] = original.pop()['source'].replace('/site/', '/orig/')
+                        #     print photos
+                        # Skipts download video for now since it doesn't work
+                        continue
+                    else:
+                        photos[photo['title']] = photo['url_o'] if is_download else photo['id']
 
         return photos
 
@@ -141,6 +163,12 @@ def start_sync(sync_path, is_download):
                     os.makedirs(folder)
 
                 for photo in photos:
+                    # Adds skips
+                    if cmd_args.ignore_images and photo.split('.').pop().lower() in EXT_IMAGE:
+                        continue
+                    elif cmd_args.ignore_videos and photo.split('.').pop().lower() in EXT_VIDEO:
+                        continue
+
                     path = os.path.join(folder, photo)
                     if os.path.exists(path):
                         print 'Skipped [%s] already downloaded' % path
@@ -157,6 +185,12 @@ def start_sync(sync_path, is_download):
             print 'Found %s photos' % len(photos)
 
             for photo in photo_sets[photo_set]:
+                # Adds skips
+                if cmd_args.ignore_images and photo.split('.').pop().lower() in EXT_IMAGE:
+                    continue
+                elif cmd_args.ignore_videos and photo.split('.').pop().lower() in EXT_VIDEO:
+                    continue
+
                 if photo in photos or is_windows and photo.replace(os.sep, '/') in photos:
                     print 'Skipped [%s] already exists in set [%s]' % (photo, folder)
                 else:
@@ -176,6 +210,8 @@ def start_sync(sync_path, is_download):
 def main():
     parser = argparse.ArgumentParser(description='Sync current folder to your flickr account.')
     parser.add_argument('--download', type=str, help='download the photos from flickr specify a path or . for all')
+    parser.add_argument('--ignore-videos', action='store_true', help='ignore video files')
+    parser.add_argument('--ignore-images', action='store_true', help='ignore image files')
 
     args = parser.parse_args()
-    start_sync(os.getcwd() + os.sep, args.download)
+    start_sync(os.getcwd() + os.sep, args)

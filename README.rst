@@ -39,6 +39,12 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.1.8 (2013-06-25)
+
+ * ignore hidden folders/folders
+ * added video support
+ * added new params for skipping video/images
+
 0.1.7 (2013-06-15)
 
  * added run from source
