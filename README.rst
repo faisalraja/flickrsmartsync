@@ -41,6 +41,10 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.1.9 (2013-06-27)
+
+ * added folder path params
+
 0.1.8 (2013-06-25)
 
  * ignore hidden folders/folders

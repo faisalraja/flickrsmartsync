@@ -11,6 +11,7 @@ __author__ = 'faisal'
 EXT_IMAGE = ('jpg', 'png', 'jpeg', 'gif', 'bmp')
 EXT_VIDEO = ('avi', 'wmv', 'mov', 'mp4', '3gp', 'ogg', 'ogv')
 
+
 def start_sync(sync_path, cmd_args):
     is_windows = os.name == 'nt'
     is_download = cmd_args.download
@@ -18,6 +19,10 @@ def start_sync(sync_path, cmd_args):
     # Put your API & SECRET keys here
     KEY = 'f7da21662566bc773c7c750ddf7030f7'
     SECRET = 'c329cdaf44c6d3f3'
+
+    if not os.path.exists(sync_path):
+        print 'Sync path does not exists'
+        exit(0)
 
     # Common arguments
     args = {'format': 'json', 'nojsoncallback': 1}
@@ -212,6 +217,8 @@ def main():
     parser.add_argument('--download', type=str, help='download the photos from flickr specify a path or . for all')
     parser.add_argument('--ignore-videos', action='store_true', help='ignore video files')
     parser.add_argument('--ignore-images', action='store_true', help='ignore image files')
+    parser.add_argument('--sync-path', type=str, help='specify the sync folder (default is current dir)')
 
     args = parser.parse_args()
-    start_sync(os.getcwd() + os.sep, args)
+    sync_path = args.sync_path.rstrip(os.sep) if args.sync_path else os.getcwd()
+    start_sync(sync_path + os.sep, args)
