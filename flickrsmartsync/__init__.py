@@ -217,8 +217,7 @@ def main():
     parser.add_argument('--download', type=str, help='download the photos from flickr specify a path or . for all')
     parser.add_argument('--ignore-videos', action='store_true', help='ignore video files')
     parser.add_argument('--ignore-images', action='store_true', help='ignore image files')
-    parser.add_argument('--sync-path', type=str, help='specify the sync folder (default is current dir)')
+    parser.add_argument('--sync-path', type=str, default=os.getcwd(), help='specify the sync folder (default is current dir)')
 
     args = parser.parse_args()
-    sync_path = args.sync_path.rstrip(os.sep) if args.sync_path else os.getcwd()
-    start_sync(sync_path + os.sep, args)
+    start_sync(args.sync_path.rstrip(os.sep) + os.sep, args)

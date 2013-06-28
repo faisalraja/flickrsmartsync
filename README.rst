@@ -41,9 +41,9 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
-0.1.9 (2013-06-27)
+0.1.9 (2013-06-28)
 
- * added folder path params
+ * added --sync-path param
 
 0.1.8 (2013-06-25)
 
