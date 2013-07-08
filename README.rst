@@ -41,6 +41,11 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.1.10 (2013-07-07)
+
+ * sorted photo sets
+ * ignore files > 1gb
+
 0.1.9 (2013-06-28)
 
  * added --sync-path param

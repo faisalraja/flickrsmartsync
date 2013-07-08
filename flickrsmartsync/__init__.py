@@ -183,7 +183,7 @@ def start_sync(sync_path, cmd_args):
     else:
         # Loop through all local photo set map and
         # upload photos that does not exists in online map
-        for photo_set in photo_sets:
+        for photo_set in sorted(photo_sets):
             folder = photo_set.replace(sync_path, '')
             print 'Getting photos in set [%s]' % folder
             photos = get_photos_in_set(folder)
@@ -201,8 +201,16 @@ def start_sync(sync_path, cmd_args):
                 else:
                     print 'Uploading [%s] to set [%s]' % (photo, folder)
                     upload_args = {'auth_token': token, 'title': photo, 'hidden': 1, 'is_public': 0, 'is_friend': 0, 'is_family': 0}
+
+                    file_path = os.path.join(photo_set, photo)
+                    file_stat = os.stat(file_path)
+
+                    if file_stat.st_size >= 1073741824:
+                        print 'Skipped [%s] over size limit' % photo
+                        continue
+
                     try:
-                        upload = api.upload(os.path.join(photo_set, photo), None, **upload_args)
+                        upload = api.upload(file_path, None, **upload_args)
                         photo_id = upload.find('photoid').text
                         add_to_photo_set(photo_id, folder)
                         photos[photo] = photo_id
