@@ -41,6 +41,12 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.1.11 (2013-07-09)
+
+ * added mts video
+ * added folder utf8 encoding to avoid dups
+ * added sorting for each folders
+
 0.1.10 (2013-07-07)
 
  * sorted photo sets

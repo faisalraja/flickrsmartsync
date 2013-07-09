@@ -9,7 +9,7 @@ import flickrapi
 __author__ = 'faisal'
 
 EXT_IMAGE = ('jpg', 'png', 'jpeg', 'gif', 'bmp')
-EXT_VIDEO = ('avi', 'wmv', 'mov', 'mp4', '3gp', 'ogg', 'ogv')
+EXT_VIDEO = ('avi', 'wmv', 'mov', 'mp4', '3gp', 'ogg', 'ogv', 'mts')
 
 
 def start_sync(sync_path, cmd_args):
@@ -113,6 +113,9 @@ def start_sync(sync_path, cmd_args):
 
     # Get photos in a set
     def get_photos_in_set(folder):
+        # bug on non utf8 machines dups
+        folder = folder.decode('utf-8')
+
         photos = {}
         # Always upload unix style
         if is_windows:
@@ -189,7 +192,7 @@ def start_sync(sync_path, cmd_args):
             photos = get_photos_in_set(folder)
             print 'Found %s photos' % len(photos)
 
-            for photo in photo_sets[photo_set]:
+            for photo in sorted(photo_sets[photo_set]):
                 # Adds skips
                 if cmd_args.ignore_images and photo.split('.').pop().lower() in EXT_IMAGE:
                     continue
