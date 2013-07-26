@@ -41,6 +41,9 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.1.2 (2013-07-26)
+ * added custom set title
+
 0.1.11 (2013-07-09)
 
  * added mts video

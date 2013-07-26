@@ -2,6 +2,7 @@
 import HTMLParser
 import json
 import os
+import re
 import urllib
 import argparse
 import flickrapi
@@ -66,11 +67,35 @@ def start_sync(sync_path, cmd_args):
         print 'To avoid disorganization on flickr sets root photos are not synced, skipped these photos:', skips_root
         print 'Try to sync at top most level of your photos directory'
 
+    # custom set builder
+    def get_custom_set_title(path):
+        title = path.split('/').pop()
+
+        if cmd_args.custom_set:
+            m = re.match(cmd_args.custom_set, path)
+            if m:
+                if not cmd_args.custom_set_builder:
+                    title = '-'.join(m.groups())
+                elif m.groupdict():
+                    title = cmd_args.custom_set_builder.format(**m.groupdict())
+                else:
+                    title = cmd_args.custom_set_builder.format(*m.groups())
+        return title
+
     # Get your photosets online and map it to your local
     html_parser = HTMLParser.HTMLParser()
     photosets_args = args.copy()
     page = 1
     photo_sets_map = {}
+
+    # Show 3 possibilities
+    if cmd_args.custom_set:
+        for photo_set in photo_sets:
+            print 'Set Title: [%s]  Path: [%s]' % (get_custom_set_title(photo_set), photo_set)
+
+        if raw_input('Is this your expected custom set titles (y/n):') != 'y':
+            exit(0)
+
     while True:
         print 'Getting photosets page %s' % page
         photosets_args.update({'page': page, 'per_page': 500})
@@ -82,8 +107,19 @@ def start_sync(sync_path, cmd_args):
         for set in sets['photosets']['photoset']:
             # Make sure it's the one from backup format
             desc = html_parser.unescape(set['description']['_content'])
-            if desc.endswith(set['title']['_content']):
+            if desc:
                 photo_sets_map[desc] = set['id']
+                title = get_custom_set_title(sync_path + desc)
+                if cmd_args.update_custom_set and desc in photo_set and title != set['title']['_content']:
+                    update_args = args.copy()
+                    update_args.update({
+                        'photoset_id': set['id'],
+                        'title': title,
+                        'description': desc
+                    })
+                    print 'Updating custom title [%s]...' % title
+                    json.loads(api.photosets_editMeta(**update_args))
+                    print 'done'
 
     print 'Found %s photo sets' % len(photo_sets_map)
 
@@ -96,12 +132,13 @@ def start_sync(sync_path, cmd_args):
 
         if folder not in photo_sets_map:
             photosets_args = args.copy()
+            custom_title = get_custom_set_title(sync_path + folder)
             photosets_args.update({'primary_photo_id': photo_id,
-                                   'title': folder.split('/').pop(),
+                                   'title': custom_title,
                                    'description': folder})
             set = json.loads(api.photosets_create(**photosets_args))
             photo_sets_map[folder] = set['photoset']['id']
-            print 'Created set [%s] and added photo' % folder
+            print 'Created set [%s] and added photo' % custom_title
         else:
             photosets_args = args.copy()
             photosets_args.update({'photoset_id': photo_sets_map.get(folder), 'photo_id': photo_id})
@@ -188,7 +225,8 @@ def start_sync(sync_path, cmd_args):
         # upload photos that does not exists in online map
         for photo_set in sorted(photo_sets):
             folder = photo_set.replace(sync_path, '')
-            print 'Getting photos in set [%s]' % folder
+            display_title = get_custom_set_title(photo_set)
+            print 'Getting photos in set [%s]' % display_title
             photos = get_photos_in_set(folder)
             print 'Found %s photos' % len(photos)
 
@@ -200,9 +238,9 @@ def start_sync(sync_path, cmd_args):
                     continue
 
                 if photo in photos or is_windows and photo.replace(os.sep, '/') in photos:
-                    print 'Skipped [%s] already exists in set [%s]' % (photo, folder)
+                    print 'Skipped [%s] already exists in set [%s]' % (photo, display_title)
                 else:
-                    print 'Uploading [%s] to set [%s]' % (photo, folder)
+                    print 'Uploading [%s] to set [%s]' % (photo, display_title)
                     upload_args = {'auth_token': token, 'title': photo, 'hidden': 1, 'is_public': 0, 'is_friend': 0, 'is_family': 0}
 
                     file_path = os.path.join(photo_set, photo)
@@ -228,7 +266,11 @@ def main():
     parser.add_argument('--download', type=str, help='download the photos from flickr specify a path or . for all')
     parser.add_argument('--ignore-videos', action='store_true', help='ignore video files')
     parser.add_argument('--ignore-images', action='store_true', help='ignore image files')
-    parser.add_argument('--sync-path', type=str, default=os.getcwd(), help='specify the sync folder (default is current dir)')
+    parser.add_argument('--sync-path', type=str, default=os.getcwd(),
+                        help='specify the sync folder (default is current dir)')
+    parser.add_argument('--custom-set', type=str, help='customize your set name from path with regex')
+    parser.add_argument('--custom-set-builder', type=str, help='build your custom set title (default just merge groups)')
+    parser.add_argument('--update-custom-set', action='store_true', help='updates your set title from custom set')
 
     args = parser.parse_args()
     start_sync(args.sync_path.rstrip(os.sep) + os.sep, args)
