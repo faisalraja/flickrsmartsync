@@ -257,6 +257,9 @@ def start_sync(sync_path, cmd_args):
                         photos[photo] = photo_id
                     except flickrapi.FlickrError as e:
                         print e.message
+                    except:
+                        # todo add tracking to show later which ones failed
+                        pass
 
     print 'All Synced'
 
