@@ -106,7 +106,7 @@ def start_sync(sync_path, cmd_args):
 
         for set in sets['photosets']['photoset']:
             # Make sure it's the one from backup format
-            desc = html_parser.unescape(set['description']['_content'])
+            desc = html_parser.unescape(set['description']['_content']).decode('utf-8')
             if desc:
                 photo_sets_map[desc] = set['id']
                 title = get_custom_set_title(sync_path + desc)
@@ -276,4 +276,4 @@ def main():
     parser.add_argument('--update-custom-set', action='store_true', help='updates your set title from custom set')
 
     args = parser.parse_args()
-    start_sync(args.sync_path.rstrip(os.sep) + os.sep, args)
+    start_sync(args.sync_path.decode('utf-8').rstrip(os.sep) + os.sep, args)
