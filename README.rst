@@ -41,8 +41,10 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
-0.1.2 (2013-07-26)
+0.1.2 (2014-02-15)
  * added custom set title
+ * character encoding bugs
+ * skip failures
 
 0.1.11 (2013-07-09)
 
