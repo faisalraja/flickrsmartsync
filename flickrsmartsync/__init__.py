@@ -6,7 +6,6 @@ import re
 import urllib
 import argparse
 import flickrapi
-import setup
 
 __author__ = 'faisal'
 
@@ -285,7 +284,8 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print 'flickrsmartsync v{}'.format(setup.VERSION)
+        # todo get from setup.cfg
+        print 'flickrsmartsync v0.1.14'
         exit()
 
     start_sync(args.sync_path.rstrip(os.sep) + os.sep, args)
