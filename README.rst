@@ -41,6 +41,11 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.1.13 (2014-02-25)
+ * added --starts-with param
+ * added --version param
+ * bug fix not uploading files properly
+
 0.1.12 (2014-02-15)
  * added custom set title
  * character encoding bugs

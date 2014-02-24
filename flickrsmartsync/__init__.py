@@ -6,6 +6,7 @@ import re
 import urllib
 import argparse
 import flickrapi
+import setup
 
 __author__ = 'faisal'
 
@@ -48,6 +49,10 @@ def start_sync(sync_path, cmd_args):
     photo_sets = {}
     skips_root = []
     for r, dirs, files in os.walk(sync_path):
+
+        if cmd_args.starts_with and not r.startswith('{}{}'.format(sync_path, cmd_args.starts_with)):
+            continue
+
         files = [f for f in files if not f.startswith('.')]
         dirs[:] = [d for d in dirs if not d.startswith('.')]
 
@@ -186,7 +191,7 @@ def start_sync(sync_path, cmd_args):
                         # Skipts download video for now since it doesn't work
                         continue
                     else:
-                        photos[photo['title']] = photo['url_o'] if is_download else photo['id']
+                        photos[photo['title'].encode('utf-8')] = photo['url_o'] if is_download else photo['id']
 
         return photos
 
@@ -266,9 +271,11 @@ def start_sync(sync_path, cmd_args):
 
 def main():
     parser = argparse.ArgumentParser(description='Sync current folder to your flickr account.')
+    parser.add_argument('--starts-with', type=str, help='only sync that path that starts with')
     parser.add_argument('--download', type=str, help='download the photos from flickr specify a path or . for all')
     parser.add_argument('--ignore-videos', action='store_true', help='ignore video files')
     parser.add_argument('--ignore-images', action='store_true', help='ignore image files')
+    parser.add_argument('--version', action='store_true', help='output current version')
     parser.add_argument('--sync-path', type=str, default=os.getcwd(),
                         help='specify the sync folder (default is current dir)')
     parser.add_argument('--custom-set', type=str, help='customize your set name from path with regex')
@@ -276,4 +283,9 @@ def main():
     parser.add_argument('--update-custom-set', action='store_true', help='updates your set title from custom set')
 
     args = parser.parse_args()
-    start_sync(args.sync_path.decode('utf-8').rstrip(os.sep) + os.sep, args)
+
+    if args.version:
+        print 'flickrsmartsync v{}'.format(setup.VERSION)
+        exit()
+
+    start_sync(args.sync_path.rstrip(os.sep) + os.sep, args)
