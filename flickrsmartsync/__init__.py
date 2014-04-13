@@ -13,7 +13,7 @@ from logging.handlers import SysLogHandler
 logger = logging.getLogger(__name__)
 hdlr = SysLogHandler()
 console = logging.StreamHandler()
-formatter = logging.Formatter('flickrsmartsync %(message)')
+formatter = logging.Formatter('flickrsmartsync %(message)s')
 hdlr.setFormatter(formatter)
 console.setFormatter(formatter)
 logger.addHandler(hdlr)
