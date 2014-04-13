@@ -1,4 +1,5 @@
 #
+# -*- coding: utf-8 -*-
 import HTMLParser
 import json
 import os
@@ -6,6 +7,19 @@ import re
 import urllib
 import argparse
 import flickrapi
+
+import logging
+from logging.handlers import SysLogHandler
+logger = logging.getLogger(__name__)
+hdlr = SysLogHandler()
+console = logging.StreamHandler()
+formatter = logging.Formatter('flickrsmartsync %(message)')
+hdlr.setFormatter(formatter)
+console.setFormatter(formatter)
+logger.addHandler(hdlr)
+logger.addHandler(console)
+logger.setLevel(logging.DEBUG)
+
 
 __author__ = 'faisal'
 
@@ -22,7 +36,7 @@ def start_sync(sync_path, cmd_args):
     SECRET = 'c329cdaf44c6d3f3'
 
     if not os.path.exists(sync_path):
-        print 'Sync path does not exists'
+        logger.error 'Sync path does not exists'
         exit(0)
 
     # Common arguments
@@ -39,7 +53,7 @@ def start_sync(sync_path, cmd_args):
     try:
         token = api.get_token_part_two((token, frob))
     except:
-        print 'Please authorized to use'
+        logger.error 'Please authorized to use'
         exit(0)
 
     args.update({'auth_token': token})
@@ -68,8 +82,8 @@ def start_sync(sync_path, cmd_args):
                         photo_sets[r].append(file)
 
     if skips_root:
-        print 'To avoid disorganization on flickr sets root photos are not synced, skipped these photos:', skips_root
-        print 'Try to sync at top most level of your photos directory'
+        logger.warn 'To avoid disorganization on flickr sets root photos are not synced, skipped these photos:', skips_root
+        logger.warn 'Try to sync at top most level of your photos directory'
 
     # custom set builder
     def get_custom_set_title(path):
@@ -95,13 +109,13 @@ def start_sync(sync_path, cmd_args):
     # Show 3 possibilities
     if cmd_args.custom_set:
         for photo_set in photo_sets:
-            print 'Set Title: [%s]  Path: [%s]' % (get_custom_set_title(photo_set), photo_set)
+            logger.info 'Set Title: [%s]  Path: [%s]' % (get_custom_set_title(photo_set), photo_set)
 
         if raw_input('Is this your expected custom set titles (y/n):') != 'y':
             exit(0)
 
     while True:
-        print 'Getting photosets page %s' % page
+        logger.info 'Getting photosets page %s' % page
         photosets_args.update({'page': page, 'per_page': 500})
         sets = json.loads(api.photosets_getList(**photosets_args))
         page += 1
@@ -121,11 +135,11 @@ def start_sync(sync_path, cmd_args):
                         'title': title,
                         'description': desc
                     })
-                    print 'Updating custom title [%s]...' % title
+                    logger.info 'Updating custom title [%s]...' % title
                     json.loads(api.photosets_editMeta(**update_args))
-                    print 'done'
+                    logger.info 'done'
 
-    print 'Found %s photo sets' % len(photo_sets_map)
+    logger.info 'Found %s photo sets' % len(photo_sets_map)
 
     # For adding photo to set
     def add_to_photo_set(photo_id, folder):
@@ -142,15 +156,15 @@ def start_sync(sync_path, cmd_args):
                                    'description': folder})
             set = json.loads(api.photosets_create(**photosets_args))
             photo_sets_map[folder] = set['photoset']['id']
-            print 'Created set [%s] and added photo' % custom_title
+            logger.info 'Created set [%s] and added photo' % custom_title
         else:
             photosets_args = args.copy()
             photosets_args.update({'photoset_id': photo_sets_map.get(folder), 'photo_id': photo_id})
             result = json.loads(api.photosets_addPhoto(**photosets_args))
             if result.get('stat') == 'ok':
-                print 'Success'
+                logger.info 'Success'
             else:
-                print result
+                logger.error result
 
     # Get photos in a set
     def get_photos_in_set(folder):
@@ -202,7 +216,7 @@ def start_sync(sync_path, cmd_args):
         for photo_set in photo_sets_map:
             if photo_set and is_download == '.' or is_download != '.' and photo_set.startswith(is_download):
                 folder = photo_set.replace(sync_path, '')
-                print 'Getting photos in set [%s]' % folder
+                logger.info 'Getting photos in set [%s]' % folder
                 photos = get_photos_in_set(folder)
                 # If Uploaded on unix and downloading on windows & vice versa
                 if is_windows:
@@ -220,9 +234,9 @@ def start_sync(sync_path, cmd_args):
 
                     path = os.path.join(folder, photo)
                     if os.path.exists(path):
-                        print 'Skipped [%s] already downloaded' % path
+                        logger.info 'Skipped [%s] already downloaded' % path
                     else:
-                        print 'Downloading photo [%s]' % path
+                        logger.info 'Downloading photo [%s]' % path
                         urllib.urlretrieve(photos[photo], os.path.join(sync_path, path))
     else:
         # Loop through all local photo set map and
@@ -230,9 +244,9 @@ def start_sync(sync_path, cmd_args):
         for photo_set in sorted(photo_sets):
             folder = photo_set.replace(sync_path, '')
             display_title = get_custom_set_title(photo_set)
-            print 'Getting photos in set [%s]' % display_title
+            logger.info 'Getting photos in set [%s]' % display_title
             photos = get_photos_in_set(folder)
-            print 'Found %s photos' % len(photos)
+            logger.info 'Found %s photos' % len(photos)
 
             for photo in sorted(photo_sets[photo_set]):
                 # Adds skips
@@ -242,9 +256,9 @@ def start_sync(sync_path, cmd_args):
                     continue
 
                 if photo in photos or is_windows and photo.replace(os.sep, '/') in photos:
-                    print 'Skipped [%s] already exists in set [%s]' % (photo, display_title)
+                    logger.info 'Skipped [%s] already exists in set [%s]' % (photo, display_title)
                 else:
-                    print 'Uploading [%s] to set [%s]' % (photo, display_title)
+                    logger.info 'Uploading [%s] to set [%s]' % (photo, display_title)
                     upload_args = {
                         'auth_token': token,
                         # (Optional) The title of the photo.
@@ -267,7 +281,7 @@ def start_sync(sync_path, cmd_args):
                     file_stat = os.stat(file_path)
 
                     if file_stat.st_size >= 1073741824:
-                        print 'Skipped [%s] over size limit' % photo
+                        logger.error 'Skipped [%s] over size limit' % photo
                         continue
 
                     try:
@@ -276,12 +290,12 @@ def start_sync(sync_path, cmd_args):
                         add_to_photo_set(photo_id, folder)
                         photos[photo] = photo_id
                     except flickrapi.FlickrError as e:
-                        print e.message
+                        logger.error e.message
                     except:
                         # todo add tracking to show later which ones failed
                         pass
 
-    print 'All Synced'
+    logger.info 'All Synced'
 
 
 def main():
@@ -301,7 +315,7 @@ def main():
 
     if args.version:
         # todo get from setup.cfg
-        print 'flickrsmartsync v0.1.14'
+        logger.info 'flickrsmartsync v0.1.14'
         exit()
 
     start_sync(args.sync_path.rstrip(os.sep) + os.sep, args)
