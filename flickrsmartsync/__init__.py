@@ -315,7 +315,7 @@ def main():
 
     if args.version:
         # todo get from setup.cfg
-        logger.info 'flickrsmartsync v0.1.14'
+        logger.info 'flickrsmartsync v0.1.14.2'
         exit()
 
     start_sync(args.sync_path.rstrip(os.sep) + os.sep, args)
