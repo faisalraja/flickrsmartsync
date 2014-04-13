@@ -12,13 +12,10 @@ import logging
 from logging.handlers import SysLogHandler
 logger = logging.getLogger(__name__)
 hdlr = SysLogHandler()
-console = logging.StreamHandler()
 formatter = logging.Formatter('flickrsmartsync %(message)s')
 hdlr.setFormatter(formatter)
-console.setFormatter(formatter)
 logger.addHandler(hdlr)
-logger.addHandler(console)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 __author__ = 'faisal'
@@ -315,7 +312,7 @@ def main():
 
     if args.version:
         # todo get from setup.cfg
-        logger.info('flickrsmartsync v0.1.14.2')
+        logger.info('v0.1.14.2')
         exit()
 
     start_sync(args.sync_path.rstrip(os.sep) + os.sep, args)
