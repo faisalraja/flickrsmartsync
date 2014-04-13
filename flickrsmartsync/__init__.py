@@ -245,7 +245,23 @@ def start_sync(sync_path, cmd_args):
                     print 'Skipped [%s] already exists in set [%s]' % (photo, display_title)
                 else:
                     print 'Uploading [%s] to set [%s]' % (photo, display_title)
-                    upload_args = {'auth_token': token, 'title': photo, 'hidden': 1, 'is_public': 0, 'is_friend': 0, 'is_family': 0}
+                    upload_args = {
+                        'auth_token': token,
+                        # (Optional) The title of the photo.
+                        'title': photo,
+                        # (Optional) A description of the photo. May contain some limited HTML.
+                        'description': folder,
+                        # (Optional) Set to 0 for no, 1 for yes. Specifies who can view the photo.
+                        'is_public': 0,
+                        'is_friend': 1,
+                        'is_family': 1,
+                        # (Optional) Set to 1 for Safe, 2 for Moderate, or 3 for Restricted.
+                        'safety_level': 1,
+                        # (Optional) Set to 1 for Photo, 2 for Screenshot, or 3 for Other.
+                        'content_type': 1,
+                        # (Optional) Set to 1 to keep the photo in global search results, 2 to hide from public searches.
+                        'hidden': 2
+                    }
 
                     file_path = os.path.join(photo_set, photo)
                     file_stat = os.stat(file_path)
