@@ -82,7 +82,7 @@ def start_sync(sync_path, cmd_args):
                         photo_sets[r].append(file)
 
     if skips_root:
-        logger.warn('To avoid disorganization on flickr sets root photos are not synced, skipped these photos:', skips_root)
+        logger.warn('To avoid disorganization on flickr sets root photos are not synced, skipped these photos: %s' % skips_root)
         logger.warn('Try to sync at top most level of your photos directory')
 
     # custom set builder
