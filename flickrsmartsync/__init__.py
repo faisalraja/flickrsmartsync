@@ -7,16 +7,16 @@ import re
 import urllib
 import argparse
 import flickrapi
-
 import logging
 from logging.handlers import SysLogHandler
+
+
 logger = logging.getLogger(__name__)
 hdlr = SysLogHandler()
 formatter = logging.Formatter('flickrsmartsync %(message)s')
 hdlr.setFormatter(formatter)
 logger.addHandler(hdlr)
 logger.setLevel(logging.INFO)
-
 
 __author__ = 'faisal'
 
@@ -264,8 +264,8 @@ def start_sync(sync_path, cmd_args):
                         'description': folder,
                         # (Optional) Set to 0 for no, 1 for yes. Specifies who can view the photo.
                         'is_public': 0,
-                        'is_friend': 1,
-                        'is_family': 1,
+                        'is_friend': 0,
+                        'is_family': 0,
                         # (Optional) Set to 1 for Safe, 2 for Moderate, or 3 for Restricted.
                         'safety_level': 1,
                         # (Optional) Set to 1 for Photo, 2 for Screenshot, or 3 for Other.
