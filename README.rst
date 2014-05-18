@@ -41,6 +41,9 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.1.14.3 (2014-05-18)
+ * encoding bug
+
 0.1.14.2 (2014-04-15)
  * send script output to syslog for headless convience (thanks dahlb)
 

@@ -121,7 +121,8 @@ def start_sync(sync_path, cmd_args):
 
         for set in sets['photosets']['photoset']:
             # Make sure it's the one from backup format
-            desc = html_parser.unescape(set['description']['_content']).decode('utf-8')
+            desc = html_parser.unescape(set['description']['_content'])
+            desc = desc.encode('utf-8') if isinstance(desc, unicode) else desc
             if desc:
                 photo_sets_map[desc] = set['id']
                 title = get_custom_set_title(sync_path + desc)
@@ -166,7 +167,7 @@ def start_sync(sync_path, cmd_args):
     # Get photos in a set
     def get_photos_in_set(folder):
         # bug on non utf8 machines dups
-        folder = folder.decode('utf-8')
+        folder = folder.encode('utf-8') if isinstance(folder, unicode) else folder
 
         photos = {}
         # Always upload unix style
