@@ -41,6 +41,9 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.1.15 (2014-05-30)
+ * monitor folder support (--monitor)
+
 0.1.14.3 (2014-05-18)
  * encoding bug
 

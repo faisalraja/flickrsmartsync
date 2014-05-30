@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-VERSION = '0.1.14.3'
+VERSION = '0.1.15'
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
           packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
           include_package_data=True,
           zip_safe=False,
-          install_requires=[],
+          install_requires=['watchdog'],
           entry_points={
               "console_scripts": ['flickrsmartsync = flickrsmartsync:main'],
           },

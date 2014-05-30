@@ -6,9 +6,12 @@ import os
 import re
 import urllib
 import argparse
+import time
 import flickrapi
 import logging
 from logging.handlers import SysLogHandler
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 
 logger = logging.getLogger(__name__)
@@ -23,14 +26,14 @@ __author__ = 'faisal'
 EXT_IMAGE = ('jpg', 'png', 'jpeg', 'gif', 'bmp')
 EXT_VIDEO = ('avi', 'wmv', 'mov', 'mp4', '3gp', 'ogg', 'ogv', 'mts')
 
+#  flickr api keys
+KEY = 'f7da21662566bc773c7c750ddf7030f7'
+SECRET = 'c329cdaf44c6d3f3'
 
-def start_sync(sync_path, cmd_args):
+
+def start_sync(sync_path, cmd_args, specific_path=None):
     is_windows = os.name == 'nt'
     is_download = cmd_args.download
-
-    # Put your API & SECRET keys here
-    KEY = 'f7da21662566bc773c7c750ddf7030f7'
-    SECRET = 'c329cdaf44c6d3f3'
 
     if not os.path.exists(sync_path):
         logger.error('Sync path does not exists')
@@ -58,7 +61,7 @@ def start_sync(sync_path, cmd_args):
     # Build your local photo sets
     photo_sets = {}
     skips_root = []
-    for r, dirs, files in os.walk(sync_path):
+    for r, dirs, files in os.walk(sync_path if not specific_path else os.path.dirname(specific_path)):
 
         if cmd_args.starts_with and not r.startswith('{}{}'.format(sync_path, cmd_args.starts_with)):
             continue
@@ -296,8 +299,31 @@ def start_sync(sync_path, cmd_args):
     logger.info('All Synced')
 
 
+class WatchEventHandler(FileSystemEventHandler):
+
+    args = None
+    sync_path = None
+
+    def __init__(self, args):
+        self.args = args
+        self.sync_path = self.args.sync_path.rstrip(os.sep)
+
+    def on_created(self, event):
+        super(WatchEventHandler, self).on_created(event)
+
+        if not event.is_directory:
+            start_sync(self.sync_path + os.sep, self.args, event.src_path)
+
+    def on_moved(self, event):
+        super(WatchEventHandler, self).on_moved(event)
+
+        if not event.is_directory and os.path.dirname(event.dest_path).replace(self.sync_path, ''):
+            start_sync(self.sync_path + os.sep, self.args, event.dest_path)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Sync current folder to your flickr account.')
+    parser.add_argument('--monitor', action='store_true', help='starts a daemon after sync for monitoring')
     parser.add_argument('--starts-with', type=str, help='only sync that path that starts with')
     parser.add_argument('--download', type=str, help='download the photos from flickr specify a path or . for all')
     parser.add_argument('--ignore-videos', action='store_true', help='ignore video files')
@@ -313,7 +339,20 @@ def main():
 
     if args.version:
         # todo get from setup.cfg
-        logger.info('v0.1.14.2')
+        logger.info('v0.1.15')
         exit()
 
     start_sync(args.sync_path.rstrip(os.sep) + os.sep, args)
+
+    if args.monitor:
+        logger.info('Monitoring [{}]'.format(args.sync_path))
+        event_handler = WatchEventHandler(args)
+        observer = Observer()
+        observer.schedule(event_handler, args.sync_path, recursive=True)
+        observer.start()
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            observer.stop()
+        observer.join()
