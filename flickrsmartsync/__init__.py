@@ -41,7 +41,7 @@ def start_sync(sync_path, cmd_args, specific_path=None):
 
     # Common arguments
     args = {'format': 'json', 'nojsoncallback': 1}
-    api = flickrapi.FlickrAPI(KEY, SECRET)
+    api = flickrapi.FlickrAPI(KEY, SECRET, cmd_args.username) #pass username argument to api
     # api.token.path = 'flickr.token.txt'
 
     # Ask for permission
@@ -334,6 +334,7 @@ def main():
     parser.add_argument('--custom-set', type=str, help='customize your set name from path with regex')
     parser.add_argument('--custom-set-builder', type=str, help='build your custom set title (default just merge groups)')
     parser.add_argument('--update-custom-set', action='store_true', help='updates your set title from custom set')
+    parser.add_argument('--username', type=str, help='token username') #token username argument for api
 
     args = parser.parse_args()
 
