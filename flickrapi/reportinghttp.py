@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
         LOG.info("%3.0f - %s" % (progress, finished))
     
-    conn = urlopen("http://www.flickr.com/", 'x' * 10245, upload)
+    conn = urlopen("https://www.flickr.com/", 'x' * 10245, upload)
     data = conn.read()
     LOG.info("Read data")
     print data[:100].split('\n')[0]
