@@ -122,17 +122,17 @@ def start_sync(sync_path, cmd_args, specific_path=None):
         if not sets['photosets']['photoset']:
             break
 
-        for set in sets['photosets']['photoset']:
+        for current_set in sets['photosets']['photoset']:
             # Make sure it's the one from backup format
-            desc = html_parser.unescape(set['description']['_content'])
+            desc = html_parser.unescape(current_set['description']['_content'])
             desc = desc.encode('utf-8') if isinstance(desc, unicode) else desc
             if desc:
-                photo_sets_map[desc] = set['id']
+                photo_sets_map[desc] = current_set['id']
                 title = get_custom_set_title(sync_path + desc)
-                if cmd_args.update_custom_set and desc in photo_set and title != set['title']['_content']:
+                if cmd_args.update_custom_set and desc in photo_set and title != current_set['title']['_content']:
                     update_args = args.copy()
                     update_args.update({
-                        'photoset_id': set['id'],
+                        'photoset_id': current_set['id'],
                         'title': title,
                         'description': desc
                     })
@@ -155,8 +155,8 @@ def start_sync(sync_path, cmd_args, specific_path=None):
             photosets_args.update({'primary_photo_id': photo_id,
                                    'title': custom_title,
                                    'description': folder})
-            set = json.loads(api.photosets_create(**photosets_args))
-            photo_sets_map[folder] = set['photoset']['id']
+            photo_set = json.loads(api.photosets_create(**photosets_args))
+            photo_sets_map[folder] = photo_set['photoset']['id']
             logger.info('Created set [%s] and added photo' % custom_title)
         else:
             photosets_args = args.copy()
