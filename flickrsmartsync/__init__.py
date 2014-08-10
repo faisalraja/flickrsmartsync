@@ -10,6 +10,7 @@ import time
 import flickrapi
 import logging
 from logging.handlers import SysLogHandler
+from iptcinfo import IPTCInfo
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -34,6 +35,7 @@ SECRET = 'c329cdaf44c6d3f3'
 def start_sync(sync_path, cmd_args, specific_path=None):
     is_windows = os.name == 'nt'
     is_download = cmd_args.download
+    keywords = set(cmd_args.keyword)
 
     if not os.path.exists(sync_path):
         logger.error('Sync path does not exists')
@@ -78,6 +80,16 @@ def start_sync(sync_path, cmd_args, specific_path=None):
                     if r == sync_path:
                         skips_root.append(file)
                     else:
+                        # filter by keywords
+                        if keywords:
+                            file_path = os.path.join(r, file)
+                            info = IPTCInfo(file_path, force=True)
+                            matches = keywords.intersection(info.keywords)
+                            if not matches:
+                                # no matching keyword(s) found, skip file
+                                logger.info('Skipped [%s] does not match any keyword %s' % (file, list(keywords)))
+                                continue
+
                         photo_sets.setdefault(r, [])
                         photo_sets[r].append(file)
 
@@ -335,6 +347,7 @@ def main():
     parser.add_argument('--custom-set-builder', type=str, help='build your custom set title (default just merge groups)')
     parser.add_argument('--update-custom-set', action='store_true', help='updates your set title from custom set')
     parser.add_argument('--username', type=str, help='token username') #token username argument for api
+    parser.add_argument('--keyword', action='append', type=str, help='only upload files matching this keyword')
 
     args = parser.parse_args()
 
