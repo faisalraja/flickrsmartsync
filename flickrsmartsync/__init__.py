@@ -10,6 +10,7 @@ import time
 import flickrapi
 import logging
 from logging.handlers import SysLogHandler
+from iptcinfo import IPTCInfo
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -34,6 +35,7 @@ SECRET = 'c329cdaf44c6d3f3'
 def start_sync(sync_path, cmd_args, specific_path=None):
     is_windows = os.name == 'nt'
     is_download = cmd_args.download
+    keywords = set(cmd_args.keyword)
 
     if not os.path.exists(sync_path):
         logger.error('Sync path does not exists')
@@ -78,6 +80,16 @@ def start_sync(sync_path, cmd_args, specific_path=None):
                     if r == sync_path:
                         skips_root.append(file)
                     else:
+                        # filter by keywords
+                        if keywords:
+                            file_path = os.path.join(r, file)
+                            info = IPTCInfo(file_path, force=True)
+                            matches = keywords.intersection(info.keywords)
+                            if not matches:
+                                # no matching keyword(s) found, skip file
+                                logger.info('Skipped [%s] does not match any keyword %s' % (file, list(keywords)))
+                                continue
+
                         photo_sets.setdefault(r, [])
                         photo_sets[r].append(file)
 
@@ -122,17 +134,17 @@ def start_sync(sync_path, cmd_args, specific_path=None):
         if not sets['photosets']['photoset']:
             break
 
-        for set in sets['photosets']['photoset']:
+        for current_set in sets['photosets']['photoset']:
             # Make sure it's the one from backup format
-            desc = html_parser.unescape(set['description']['_content'])
+            desc = html_parser.unescape(current_set['description']['_content'])
             desc = desc.encode('utf-8') if isinstance(desc, unicode) else desc
             if desc:
-                photo_sets_map[desc] = set['id']
+                photo_sets_map[desc] = current_set['id']
                 title = get_custom_set_title(sync_path + desc)
-                if cmd_args.update_custom_set and desc in photo_set and title != set['title']['_content']:
+                if cmd_args.update_custom_set and desc in photo_set and title != current_set['title']['_content']:
                     update_args = args.copy()
                     update_args.update({
-                        'photoset_id': set['id'],
+                        'photoset_id': current_set['id'],
                         'title': title,
                         'description': desc
                     })
@@ -155,8 +167,8 @@ def start_sync(sync_path, cmd_args, specific_path=None):
             photosets_args.update({'primary_photo_id': photo_id,
                                    'title': custom_title,
                                    'description': folder})
-            set = json.loads(api.photosets_create(**photosets_args))
-            photo_sets_map[folder] = set['photoset']['id']
+            photo_set = json.loads(api.photosets_create(**photosets_args))
+            photo_sets_map[folder] = photo_set['photoset']['id']
             logger.info('Created set [%s] and added photo' % custom_title)
         else:
             photosets_args = args.copy()
@@ -335,6 +347,7 @@ def main():
     parser.add_argument('--custom-set-builder', type=str, help='build your custom set title (default just merge groups)')
     parser.add_argument('--update-custom-set', action='store_true', help='updates your set title from custom set')
     parser.add_argument('--username', type=str, help='token username') #token username argument for api
+    parser.add_argument('--keyword', action='append', type=str, help='only upload files matching this keyword')
 
     args = parser.parse_args()
 
