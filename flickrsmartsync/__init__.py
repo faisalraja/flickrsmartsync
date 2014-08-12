@@ -35,7 +35,7 @@ SECRET = 'c329cdaf44c6d3f3'
 def start_sync(sync_path, cmd_args, specific_path=None):
     is_windows = os.name == 'nt'
     is_download = cmd_args.download
-    keywords = set(cmd_args.keyword)
+    keywords = set(cmd_args.keyword) if cmd_args .keyword else ()
 
     if not os.path.exists(sync_path):
         logger.error('Sync path does not exists')
@@ -43,7 +43,7 @@ def start_sync(sync_path, cmd_args, specific_path=None):
 
     # Common arguments
     args = {'format': 'json', 'nojsoncallback': 1}
-    api = flickrapi.FlickrAPI(KEY, SECRET, cmd_args.username) #pass username argument to api
+    api = flickrapi.FlickrAPI(KEY, SECRET, cmd_args.username)  # pass username argument to api
     # api.token.path = 'flickr.token.txt'
 
     # Ask for permission
