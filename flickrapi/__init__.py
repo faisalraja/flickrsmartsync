@@ -656,7 +656,8 @@ class FlickrAPI(object):
             browser = webbrowser.get()
         except webbrowser.Error:
             if 'BROWSER' not in os.environ:
-                raise
+                print 'Please authorize: %s' % auth_url
+                return
             browser = webbrowser.GenericBrowser(os.environ['BROWSER'])
 
         browser.open(auth_url, True, True)
