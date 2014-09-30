@@ -33,7 +33,6 @@ def main():
     parser.add_argument('--update-custom-set', action='store_true', help='updates your set title from custom set')
     parser.add_argument('--username', type=str, help='token username') #token username argument for api
     parser.add_argument('--keyword', action='append', type=str, help='only upload files matching this keyword')
-    parser.add_argument('--token', type=str, help='token value') #token value for api
 
     args = parser.parse_args()
 
