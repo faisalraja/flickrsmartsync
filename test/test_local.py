@@ -17,6 +17,7 @@ class localTest(unittest.TestCase):
         class args:
             sync_path=here+os.sep
             starts_with=None
+            keyword=None
         self.local = Local(args())
         self.watch_path = None
 
