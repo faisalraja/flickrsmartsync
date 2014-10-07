@@ -16,7 +16,7 @@ class Sync(object):
         # Do the appropriate one time sync
         if self.cmd_args.download:
             self.download()
-        elif self.cmd_args.sync:
+        elif self.cmd_args.sync_from:
             self.sync()
         else:
             self.upload()
@@ -24,6 +24,28 @@ class Sync(object):
             if self.cmd_args.monitor:
                 self.local.watch_for_changes(self.upload)
                 self.local.wait_for_quit()
+
+    def sync(self):
+        if self.cmd_args.sync_from == "all":
+            local_photo_sets = self.local.build_photo_sets(only_dir, EXT_IMAGE + EXT_VIDEO)
+            remote_photo_sets = self.remote.get_photo_sets()
+            # First upload complete local sets that are not remote
+            for photo_set in local_photo_sets:
+                if photo_set.replace(self.cmd_args.sync_path, '').replace(os.sep, "/") not in remote_photo_sets:
+                    self.upload(os.path.join(photo_set, "dummy_filename.jpg"))
+            # Now download complete remote sets that are not local
+            for photo_set in remote_photo_sets:
+                photo_set = os.path.join(self.cmd_args.sync_path, photo_set).replace("/", os.sep)
+                if photo_set not in local_photo_sets:
+                    # TODO: will generate info messages if photo_set is a prefix to other set names
+                    self.cmd_args.download = photo_set
+                    self.download()
+            # Now do the overlap
+            for photo_set in local_photo_sets:
+                remote_photos = self.remote.get_photos_in_set(photo_set.replace(self.cmd_args.sync_path, '').replace(os.sep, "/")) 
+          
+        else:
+            logger.warning("Unsupported sync option: %s" % self.cmd_args.sync_from)
 
     def download(self):
         # Download to corresponding paths

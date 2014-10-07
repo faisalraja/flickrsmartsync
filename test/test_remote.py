@@ -3,10 +3,10 @@ import unittest
 import logging
 import sys
 import os
-import flickrapi
+
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(here, '..'))
-
+import flickrapi
 from flickrsmartsync.remote import Remote, KEY, SECRET
 logger = logging.getLogger("flickrsmartsync")
 logger.setLevel(logging.WARNING)

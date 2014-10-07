@@ -3,11 +3,11 @@ import unittest
 import logging
 import sys
 import os
-import flickrapi
 import time
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(here, '..'))
 from flickrsmartsync.local import Local
+
 logger = logging.getLogger("flickrsmartsync")
 logger.setLevel(logging.WARNING)
 

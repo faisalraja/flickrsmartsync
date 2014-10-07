@@ -3,7 +3,8 @@ import unittest
 import logging
 import sys
 import os
-import flickrapi
+import copy
+
 import time
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(here, '..'))
@@ -12,9 +13,12 @@ logger = logging.getLogger("flickrsmartsync")
 logger.setLevel(logging.WARNING)
 
 fakestat = os.stat(__file__)
+fakeid = 45
 class fakeLocal:
+    files = {}
     def __init__(self):
-        self.files = {here + os.sep + "dirname": [("file1.jpg", fakestat), ("file2.avi", fakestat)]}
+        self.files.clear()
+        self.files.update({here + os.sep + "dirname": [("file1.jpg", fakestat), ("file2.avi", fakestat)]})
     
     def build_photo_sets(self, specific_path, exts):
         return self.files
@@ -22,13 +26,17 @@ class fakeLocal:
 class fakeRemote:
     def __init__(self):
         self.photo_sets_map = {"dirname": "12345"}
-        self.files = {"12345": ["file3.jpg", "file4.avi"]}  
+        self.files = {"12345": {"file3.jpg": 23, "file4.avi": 23}}  
+    def get_photo_sets(self):
+        return self.photo_sets_map
     def get_custom_set_title(self, path):
         return path.split('/').pop()      
     def get_photos_in_set(self, folder, get_url=False):
         return self.files[self.photo_sets_map[folder]]  
     def upload(self, file_path, photo, folder):
-        self.files[self.photo_sets_map[folder]].append(photo)
+        self.files[self.photo_sets_map[folder]][photo] = fakeid
+    def download(self, url, path):
+        fakeLocal.files.values()[0].append((os.path.basename(path), fakestat))
 
 class syncTest(unittest.TestCase):
 
@@ -39,6 +47,7 @@ class syncTest(unittest.TestCase):
             ignore_images=False
             ignore_videos=False
             is_windows=False
+            download="."
         self.local = fakeLocal()
         self.remote = fakeRemote()
         self.sync = Sync(args(), self.local, self.remote)
@@ -48,16 +57,27 @@ class syncTest(unittest.TestCase):
 
     def test_upload(self):
         expected = fakeRemote().files
-        expected.values()[0] += [x[0] for x in self.local.files.values()[0]]
+        for f, s in self.local.files.values()[0]:
+            expected.values()[0][f] = fakeid
         self.sync.upload()
         self.assertEquals(self.remote.files, expected)
 
-#    def test_download(self):
-#        expected = fakeLocal().files
-#        expected.values()[0] += [x[0] for x in self.local.files.values()[0]]
-#        self.sync.upload()
-#        self.assertEquals(self.remote.files, expected)
+    def test_download(self):
+        expected = copy.deepcopy(fakeLocal().files)
+        expected.values()[0] += [(x, fakestat) for x in self.remote.files.values()[0]]
+        self.sync.download()
+        self.assertEquals(self.local.files, expected)
 
+    def test_sync(self):
+        expectedr = fakeRemote().files
+        for f, s in self.local.files.values()[0]:
+            expectedr.values()[0][f] = fakeid        
+        expectedl = copy.deepcopy(fakeLocal().files)
+        expectedl.values()[0] += [(x, fakestat) for x in self.remote.files.values()[0]]
+        self.sync.sync()
+        self.assertEquals(self.remote.files, expectedr)
+        self.assertEquals(self.local.files, expectedl)
+        
 if __name__ == '__main__':
     logging.debug('Started test case')
     unittest.main(verbosity=2)      
