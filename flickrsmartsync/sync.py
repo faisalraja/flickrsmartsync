@@ -27,23 +27,31 @@ class Sync(object):
 
     def sync(self):
         if self.cmd_args.sync_from == "all":
-            local_photo_sets = self.local.build_photo_sets(only_dir, EXT_IMAGE + EXT_VIDEO)
+            local_photo_sets = self.local.build_photo_sets(self.cmd_args.sync_path, EXT_IMAGE + EXT_VIDEO)
             remote_photo_sets = self.remote.get_photo_sets()
-            # First upload complete local sets that are not remote
-            for photo_set in local_photo_sets:
-                if photo_set.replace(self.cmd_args.sync_path, '').replace(os.sep, "/") not in remote_photo_sets:
-                    self.upload(os.path.join(photo_set, "dummy_filename.jpg"))
-            # Now download complete remote sets that are not local
-            for photo_set in remote_photo_sets:
-                photo_set = os.path.join(self.cmd_args.sync_path, photo_set).replace("/", os.sep)
-                if photo_set not in local_photo_sets:
+            # First download complete remote sets that are not local
+            for remote_photo_set in remote_photo_sets:
+                local_photo_set = os.path.join(self.cmd_args.sync_path, remote_photo_set).replace("/", os.sep)
+                if local_photo_set not in local_photo_sets:
                     # TODO: will generate info messages if photo_set is a prefix to other set names
-                    self.cmd_args.download = photo_set
+                    self.cmd_args.download = local_photo_set
                     self.download()
-            # Now do the overlap
-            for photo_set in local_photo_sets:
-                remote_photos = self.remote.get_photos_in_set(photo_set.replace(self.cmd_args.sync_path, '').replace(os.sep, "/")) 
-          
+            # Now walk our local sets
+            for local_photo_set in sorted(local_photo_sets):
+                remote_photo_set = local_photo_set.replace(self.cmd_args.sync_path, '').replace("/", os.sep)
+                if remote_photo_set not in remote_photo_sets:
+                    # doesn't exist remotely, so all files need uploading
+                    remote_photos = {}
+                else:
+                    # filter by what exists remotely, this is a dict of filename->id
+                    remote_photos = self.remote.get_photos_in_set(remote_photo_set)
+                local_photos = [photo for photo, file_stat in sorted(local_photo_sets[local_photo_set])]
+                # download what doesn't exist locally
+                for photo in [photo for photo in remote_photos if photo not in local_photos]:
+                    self.remote.download(remote_photos[photo], os.path.join(local_photo_set, photo))
+                # upload what doesn't exist remotely
+                for photo in [photo for photo in local_photos if photo not in remote_photos]:
+                    self.remote.upload(os.path.join(local_photo_set, photo), photo, remote_photo_set)          
         else:
             logger.warning("Unsupported sync option: %s" % self.cmd_args.sync_from)
 
@@ -51,6 +59,7 @@ class Sync(object):
         # Download to corresponding paths
         for photo_set in self.remote.get_photo_sets():
             if photo_set and (self.cmd_args.download == '.' or photo_set.startswith(self.cmd_args.download)):
+                # TODO: something's not right here, folder never gets used...
                 folder = os.path.join(self.cmd_args.sync_path, photo_set)
                 logger.info('Getting photos in set [%s]' % photo_set)
                 photos = self.remote.get_photos_in_set(photo_set, get_url=True)

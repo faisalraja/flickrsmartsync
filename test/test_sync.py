@@ -39,6 +39,7 @@ class fakeRemote:
         fakeLocal.files.values()[0].append((os.path.basename(path), fakestat))
 
 class syncTest(unittest.TestCase):
+    maxDiff=None
 
     def setUp(self):
         class args:
@@ -48,6 +49,7 @@ class syncTest(unittest.TestCase):
             ignore_videos=False
             is_windows=False
             download="."
+            sync_from="all"
         self.local = fakeLocal()
         self.remote = fakeRemote()
         self.sync = Sync(args(), self.local, self.remote)
