@@ -41,6 +41,9 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.1.18 (2014-11-14)
+ * browser-less authentication
+
 0.1.17 (2014-08-12)
  * allow filtering files to upload by IPTC keyword (thanks ricardokirkner)
  * updated flickrapi 1.4.4
