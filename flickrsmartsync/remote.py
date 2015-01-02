@@ -104,22 +104,27 @@ class Remote(object):
                     break
 
                 for photo in photos_in_set['photoset']['photo']:
-
+                    title = photo['title'].encode('utf-8')
+                    # add missing extension if not present (take a guess as api original_format argument not working)
+                    split = title.split(".")
+                    if len(split) < 2 or split[1].isdigit():
+                        if photo.get('media') == 'video':
+                            title += ".mp4"
+                        else:
+                            title += ".jpg"
                     if get_url and photo.get('media') == 'video':
-                        # photo_args = args.copy()
-                        # photo_args['photo_id'] = photo['id']
-                        # sizes = json.loads(api.photos_getSizes(**photo_args))
-                        # if sizes['stat'] != 'ok':
-                        #     continue
-                        #
-                        # original = filter(lambda s: s['label'].startswith('Site') and s['media'] == 'video', sizes['sizes']['size'])
-                        # if original:
-                        #     photos[photo['title']] = original.pop()['source'].replace('/site/', '/orig/')
-                        #     print photos
-                        # Skipts download video for now since it doesn't work
-                        continue
+                        photo_args = self.args.copy()
+                        photo_args['photo_id'] = photo['id']
+                        sizes = json.loads(self.api.photos_getSizes(**photo_args))
+                        if sizes['stat'] != 'ok':
+                            continue
+
+                        original = filter(lambda s: s['label'].startswith('Video Original') and s['media'] == 'video', sizes['sizes']['size'])
+                        if original:
+                            photos[title] = original.pop()['source']
+                            
                     else:
-                        photos[photo['title'].encode('utf-8')] = photo['url_o'] if get_url else photo['id']
+                        photos[title] = photo['url_o'] if get_url else photo['id']
 
         return photos
 

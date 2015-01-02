@@ -44,7 +44,7 @@ class Sync(object):
                     remote_photos = {}
                 else:
                     # filter by what exists remotely, this is a dict of filename->id
-                    remote_photos = self.remote.get_photos_in_set(remote_photo_set)
+                    remote_photos = self.remote.get_photos_in_set(remote_photo_set, get_url=True)
                 local_photos = [photo for photo, file_stat in sorted(local_photo_sets[local_photo_set])]
                 # download what doesn't exist locally
                 for photo in [photo for photo in remote_photos if photo not in local_photos]:
@@ -59,7 +59,6 @@ class Sync(object):
         # Download to corresponding paths
         for photo_set in self.remote.get_photo_sets():
             if photo_set and (self.cmd_args.download == '.' or photo_set.startswith(self.cmd_args.download)):
-                # TODO: something's not right here, folder never gets used...
                 folder = os.path.join(self.cmd_args.sync_path, photo_set)
                 logger.info('Getting photos in set [%s]' % photo_set)
                 photos = self.remote.get_photos_in_set(photo_set, get_url=True)
@@ -73,13 +72,12 @@ class Sync(object):
                         continue
                     elif self.cmd_args.ignore_videos and photo.split('.').pop().lower() in EXT_VIDEO:
                         continue
-
-                    path = os.path.join(photo_set, photo)
+                    path = os.path.join(folder, photo)
                     if os.path.exists(path):
-                        logger.info('Skipped [%s] already downloaded' % path)
+                        logger.info('Skipped [%s/%s] already downloaded' % (photo_set, photo))
                     else:
-                        logger.info('Downloading photo [%s]' % path)
-                        self.remote.download(photos[photo], os.path.join(self.cmd_args.sync_path, path))
+                        logger.info('Downloading photo [%s/%s]' % (photo_set, photo))
+                        self.remote.download(photos[photo], path)
 
     def upload(self, specific_path=None):
         if specific_path == None:
