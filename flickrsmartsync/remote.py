@@ -11,6 +11,9 @@ logger = logging.getLogger("flickrsmartsync")
 KEY = 'f7da21662566bc773c7c750ddf7030f7'
 SECRET = 'c329cdaf44c6d3f3'
 
+# number of retries for downloads
+RETRIES = 5
+
 class Remote(object):
     def __init__(self, cmd_args):
         # Command line arguments
@@ -173,20 +176,27 @@ class Remote(object):
             # (Optional) Set to 1 to keep the photo in global search results, 2 to hide from public searches.
             'hidden': 2
         }
-
-        try:
-            upload = self.api.upload(file_path, None, **upload_args)
-            photo_id = upload.find('photoid').text
-            self.add_to_photo_set(photo_id, folder)
-            return photo_id
-        except flickrapi.FlickrError as e:
-            logger.error(e.message)
-        except:
-            # todo add tracking to show later which ones failed
-            pass
+        for i in range(RETRIES):
+            try:
+                upload = self.api.upload(file_path, None, **upload_args)
+                photo_id = upload.find('photoid').text
+                self.add_to_photo_set(photo_id, folder)
+                return photo_id
+            except flickrapi.FlickrError as e:
+                logger.warning("Retrying upload of %s/%s after error: %s" %(folder, photo, e))
+            except:
+                # todo add tracking to show later which ones failed
+                pass                
+        logger.error("Failed upload of %s/%s after %d retries" %(folder, photo, RETRIES))
 
     def download(self, url, path):
         folder = os.path.dirname(path)
         if not os.path.isdir(folder):
-            os.makedirs(folder)    
-        return urllib.urlretrieve(url, path)
+            os.makedirs(folder)   
+        for i in range(RETRIES):
+            try:
+                return urllib.urlretrieve(url, path)
+            except IOError as e:
+                logger.warning("Retrying download of %s after error: %s" %(path, e))
+        # failed many times
+        logger.error("Failed to download %s after %d retries" %(path, RETRIES))
