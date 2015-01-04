@@ -77,7 +77,7 @@ class Remote(object):
             photosets_args.update({'photoset_id': self.photo_sets_map.get(folder), 'photo_id': photo_id})
             result = json.loads(self.api.photosets_addPhoto(**photosets_args))
             if result.get('stat') == 'ok':
-                logger.info('Success')
+                logger.info('Successfully added photo to %s' % folder)
             else:
                 logger.error(result)
 
