@@ -107,7 +107,8 @@ class Remote(object):
                     title = photo['title'].encode('utf-8')
                     # add missing extension if not present (take a guess as api original_format argument not working)
                     split = title.split(".")
-                    if len(split) < 2 or split[1].isdigit():
+                    # assume valid file extension is less than or equal to 5 characters and not all digits
+                    if len(split) < 2 or len(split[-1]) > 5 or split[-1].isdigit():
                         if photo.get('media') == 'video':
                             title += ".mp4"
                         else:
