@@ -28,7 +28,7 @@ def main():
     parser.add_argument('--version', action='store_true', help='output current version')
     parser.add_argument('--sync-path', type=str, default=os.getcwd(),
                         help='specify the sync folder (default is current dir)')
-    parser.add_argument('--sync_from', type=str, help='If set to "all", then upload anythin that isn\'t on flickr, and download anything that isn\'t on the local filesystem')
+    parser.add_argument('--sync-from', type=str, help='If set to "all", then upload anything that isn\'t on flickr, and download anything that isn\'t on the local filesystem')
     parser.add_argument('--custom-set', type=str, help='customize your set name from path with regex')
     parser.add_argument('--custom-set-builder', type=str, help='build your custom set title (default just merge groups)')
     parser.add_argument('--update-custom-set', action='store_true', help='updates your set title from custom set')
