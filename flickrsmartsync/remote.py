@@ -188,11 +188,8 @@ class Remote(object):
                 photo_id = upload.find('photoid').text
                 self.add_to_photo_set(photo_id, folder)
                 return photo_id
-            except flickrapi.FlickrError as e:
+            except Exception as e:
                 logger.warning("Retrying upload of %s/%s after error: %s" %(folder, photo, e))
-            except:
-                # todo add tracking to show later which ones failed
-                pass                
         logger.error("Failed upload of %s/%s after %d retries" %(folder, photo, RETRIES))
 
     def download(self, url, path):
@@ -202,7 +199,7 @@ class Remote(object):
         for i in range(RETRIES):
             try:
                 return urllib.urlretrieve(url, path)
-            except IOError as e:
+            except Exception as e:
                 logger.warning("Retrying download of %s after error: %s" %(path, e))
         # failed many times
         logger.error("Failed to download %s after %d retries" %(path, RETRIES))
