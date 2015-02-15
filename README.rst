@@ -41,6 +41,15 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.2.00 (2015-02-15)
+ * Refactor code into sync, local and remote classes
+ * Add test cases that do a limited test of each class in isolation
+ * Add a sync-from=all command line option that allows a download of any remote file not on local, and upload of any local file not on remote as discussed in #22
+ * Add retries on uploads and downloads
+ * Add a file extension on download if one doesn't exist
+ * Incorporate pull request #32 which fixes #31 with slight changes
+ * Thanks thomascobb
+
 0.1.18 (2014-11-14)
  * browser-less authentication
 

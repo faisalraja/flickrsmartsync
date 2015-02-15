@@ -4,7 +4,9 @@ from watchdog.events import FileSystemEventHandler
 import time
 import logging
 import os
+
 logger = logging.getLogger("flickrsmartsync")
+
 
 class Local(object):
     def __init__(self, cmd_args):

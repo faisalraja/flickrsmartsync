@@ -5,6 +5,7 @@ import re
 import urllib
 import flickrapi
 import logging
+
 logger = logging.getLogger("flickrsmartsync")
 
 #  flickr api keys
@@ -14,7 +15,9 @@ SECRET = 'c329cdaf44c6d3f3'
 # number of retries for downloads
 RETRIES = 5
 
+
 class Remote(object):
+
     def __init__(self, cmd_args):
         # Command line arguments
         self.cmd_args = cmd_args
@@ -27,7 +30,7 @@ class Remote(object):
         self.update_photo_sets_map()
 
     def auth_api(self):
-        self.api = flickrapi.FlickrAPI(KEY, SECRET, username=self.cmd_args.username) #pass username argument to api
+        self.api = flickrapi.FlickrAPI(KEY, SECRET, username=self.cmd_args.username)  # pass username argument to api
         # api.token.path = 'flickr.token.txt'
 
         # Ask for permission
@@ -138,6 +141,7 @@ class Remote(object):
         photosets_args = self.args.copy()
         page = 1
         self.photo_sets_map = {}
+
         while True:
             logger.info('Getting photosets page %s' % page)
             photosets_args.update({'page': page, 'per_page': 500})
@@ -182,6 +186,7 @@ class Remote(object):
             # (Optional) Set to 1 to keep the photo in global search results, 2 to hide from public searches.
             'hidden': 2
         }
+
         for i in range(RETRIES):
             try:
                 upload = self.api.upload(file_path, None, **upload_args)
@@ -189,8 +194,8 @@ class Remote(object):
                 self.add_to_photo_set(photo_id, folder)
                 return photo_id
             except Exception as e:
-                logger.warning("Retrying upload of %s/%s after error: %s" %(folder, photo, e))
-        logger.error("Failed upload of %s/%s after %d retries" %(folder, photo, RETRIES))
+                logger.warning("Retrying upload of %s/%s after error: %s" % (folder, photo, e))
+        logger.error("Failed upload of %s/%s after %d retries" % (folder, photo, RETRIES))
 
     def download(self, url, path):
         folder = os.path.dirname(path)
@@ -200,6 +205,6 @@ class Remote(object):
             try:
                 return urllib.urlretrieve(url, path)
             except Exception as e:
-                logger.warning("Retrying download of %s after error: %s" %(path, e))
+                logger.warning("Retrying download of %s after error: %s" % (path, e))
         # failed many times
-        logger.error("Failed to download %s after %d retries" %(path, RETRIES))
+        logger.error("Failed to download %s after %d retries" % (path, RETRIES))

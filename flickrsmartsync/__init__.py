@@ -39,7 +39,7 @@ def main():
 
     if args.version:
         # todo get from setup.cfg
-        logger.info('v0.1.18')
+        logger.info('0.2.00')
         exit()
 
     # validate args

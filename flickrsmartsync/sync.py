@@ -1,11 +1,14 @@
 import os
 import logging
+
 logger = logging.getLogger("flickrsmartsync")
 
 EXT_IMAGE = ('jpg', 'png', 'jpeg', 'gif', 'bmp')
 EXT_VIDEO = ('avi', 'wmv', 'mov', 'mp4', '3gp', 'ogg', 'ogv', 'mts')
 
+
 class Sync(object):
+
     def __init__(self, cmd_args, local, remote):
         self.cmd_args = cmd_args
         # Create local and remote objects
@@ -80,14 +83,14 @@ class Sync(object):
                         self.remote.download(photos[photo], path)
 
     def upload(self, specific_path=None):
-        if specific_path == None:
+        if specific_path is None:
             only_dir = self.cmd_args.sync_path
         else:
             only_dir = os.path.dirname(specific_path)
         photo_sets = self.local.build_photo_sets(only_dir, EXT_IMAGE + EXT_VIDEO)
         logger.info('Found %s photo sets' % len(photo_sets))
 
-        if specific_path == None:
+        if specific_path is None:
             # Show custom set titles
             if self.cmd_args.custom_set:
                 for photo_set in photo_sets:
@@ -123,6 +126,3 @@ class Sync(object):
                     photo_id = self.remote.upload(file_path, photo, folder)
                     if photo_id:
                         photos[photo] = photo_id
-
-
-
