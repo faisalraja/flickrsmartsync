@@ -41,6 +41,10 @@ Both run from source and command line have same parameters::
 Change log
 ==========
 
+0.2.01 (2015-02-17)
+ * added --custom-set-debug for testing custom sets output
+ * added --ignore-ext comma separated extensions to ignore
+
 0.2.00 (2015-02-15)
  * Refactor code into sync, local and remote classes
  * Add test cases that do a limited test of each class in isolation

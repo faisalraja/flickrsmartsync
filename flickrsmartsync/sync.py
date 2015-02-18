@@ -10,10 +10,16 @@ EXT_VIDEO = ('avi', 'wmv', 'mov', 'mp4', '3gp', 'ogg', 'ogv', 'mts')
 class Sync(object):
 
     def __init__(self, cmd_args, local, remote):
+        global EXT_IMAGE, EXT_VIDEO
         self.cmd_args = cmd_args
         # Create local and remote objects
         self.local = local
         self.remote = remote
+        # Ignore extensions
+        if self.cmd_args.ignore_ext:
+            extensions = self.cmd_args.ignore_ext.split(',')
+            EXT_IMAGE = filter(lambda e: e not in extensions, EXT_IMAGE)
+            EXT_VIDEO = filter(lambda e: e not in extensions, EXT_VIDEO)
 
     def start_sync(self):
         # Do the appropriate one time sync
@@ -96,7 +102,7 @@ class Sync(object):
                 for photo_set in photo_sets:
                     logger.info('Set Title: [%s]  Path: [%s]' % (self.remote.get_custom_set_title(photo_set), photo_set))
 
-                if raw_input('Is this your expected custom set titles (y/n):') != 'y':
+                if self.cmd_args.custom_set_debug and raw_input('Is this your expected custom set titles (y/n):') != 'y':
                     exit(0)
 
         # Loop through all local photo set map and
