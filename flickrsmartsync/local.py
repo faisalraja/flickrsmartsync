@@ -18,7 +18,7 @@ class Local(object):
         skips_root = []
         keywords = set(self.cmd_args.keyword) if self.cmd_args.keyword else ()
 
-        for r, dirs, files in os.walk(path):
+        for r, dirs, files in os.walk(path, followlinks=True):
 
             if self.cmd_args.starts_with and not r.startswith('{}{}'.format(self.cmd_args.sync_path, self.cmd_args.starts_with)):
                 continue
@@ -42,7 +42,7 @@ class Local(object):
                                     # no matching keyword(s) found, skip file
                                     logger.info('Skipped [%s] does not match any keyword %s' % (file, list(keywords)))
                                     continue
-                        
+
                             photo_sets.setdefault(r, [])
                             file_path = os.path.join(r, file)
                             file_stat = os.stat(file_path)
@@ -86,4 +86,4 @@ class WatchEventHandler(FileSystemEventHandler):
         super(WatchEventHandler, self).on_moved(event)
 
         if not event.is_directory and os.path.dirname(event.dest_path).replace(self.sync_path, ''):
-            self.upload_func(event.dest_path)        
+            self.upload_func(event.dest_path)
