@@ -34,6 +34,9 @@ Both run from source and command line have same parameters::
     start downloading all paths starting with that path
     $ flickrsmartsync --download 2008/2008-01-01
 
+    Generate custom set titles from YEAR/MONTH/DAY folder hierarchy:
+    $  flickrsmartsync --custom-set='(?:.*)((?:19|20)\d{2})/(\d{2})/(\d{2})' --custom-set-builder '{0}-{1}-{2}'
+
     for direct python access
     $ python flickrsmartsync
 
