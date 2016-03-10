@@ -143,7 +143,7 @@ class Remote(object):
         self.photo_sets_map = {}
 
         while True:
-            logger.info('Getting photosets page %s' % page)
+            logger.debug('Getting photosets page %s' % page)
             photosets_args.update({'page': page, 'per_page': 500})
             sets = json.loads(self.api.photosets_getList(**photosets_args))
             page += 1
