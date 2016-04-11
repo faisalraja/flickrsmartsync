@@ -6,11 +6,13 @@ logger = logging.getLogger("flickrsmartsync")
 EXT_IMAGE = ('jpg', 'png', 'jpeg', 'gif', 'bmp')
 EXT_VIDEO = ('avi', 'wmv', 'mov', 'mp4', '3gp', 'ogg', 'ogv', 'mts')
 
+VIDEO_MAX_SIZE = 1 * 1024 * 1024 * 1024 # 1GB
+IMAGE_MAX_SIZE = 200 * 1024 * 1024      # 200MB
 
 class Sync(object):
 
     def __init__(self, cmd_args, local, remote):
-        global EXT_IMAGE, EXT_VIDEO
+        global EXT_IMAGE, EXT_VIDEO, VIDEO_MAX_SIZE, IMAGE_MAX_SIZE
         self.cmd_args = cmd_args
         # Create local and remote objects
         self.local = local
@@ -60,7 +62,27 @@ class Sync(object):
                     self.remote.download(remote_photos[photo], os.path.join(local_photo_set, photo))
                 # upload what doesn't exist remotely
                 for photo in [photo for photo in local_photos if photo not in remote_photos]:
-                    self.remote.upload(os.path.join(local_photo_set, photo), photo, remote_photo_set)          
+                    file_path = os.path.join(local_photo_set, photo)
+                    file_stat = os.stat(file_path)
+
+                    # Adds skips
+                    if self.cmd_args.ignore_images and photo.split('.').pop().lower() in EXT_IMAGE:
+                        continue
+                    elif self.cmd_args.ignore_videos and photo.split('.').pop().lower() in EXT_VIDEO:
+                        continue
+
+                    # Skip files too large
+                    if file_stat.st_size >= IMAGE_MAX_SIZE and photo.split('.').pop().lower() in EXT_IMAGE:
+                        logger.error('Skipped [%s] over image size limit' % photo)
+                        continue
+                    if file_stat.st_size >= VIDEO_MAX_SIZE and photo.split('.').pop().lower() in EXT_VIDEO:
+                        logger.error('Skipped [%s] over video size limit' % photo)
+                        continue
+
+                    display_title = self.remote.get_custom_set_title(local_photo_set)
+                    logger.info('Uploading [%s] to set [%s]' % (photo, display_title))
+                    self.remote.upload(file_path, photo, remote_photo_set)
+      
         else:
             logger.warning("Unsupported sync option: %s" % self.cmd_args.sync_from)
 
@@ -83,7 +105,7 @@ class Sync(object):
                         continue
                     path = os.path.join(folder, photo)
                     if os.path.exists(path):
-                        logger.info('Skipped [%s/%s] already downloaded' % (photo_set, photo))
+                        logger.debug('Skipped [%s/%s] already downloaded' % (photo_set, photo))
                     else:
                         logger.info('Downloading photo [%s/%s]' % (photo_set, photo))
                         self.remote.download(photos[photo], path)
@@ -122,12 +144,17 @@ class Sync(object):
                     continue
 
                 if photo in photos or self.cmd_args.is_windows and photo.replace(os.sep, '/') in photos:
-                    logger.info('Skipped [%s] already exists in set [%s]' % (photo, display_title))
+                    logger.debug('Skipped [%s] already exists in set [%s]' % (photo, display_title))
                 else:
-                    logger.info('Uploading [%s] to set [%s]' % (photo, display_title))
-                    if file_stat.st_size >= 1073741824:
-                        logger.error('Skipped [%s] over size limit' % photo)
+                    # Skip files too large
+                    if file_stat.st_size >= IMAGE_MAX_SIZE and photo.split('.').pop().lower() in EXT_IMAGE:
+                        logger.error('Skipped [%s] over image size limit' % photo)
                         continue
+                    if file_stat.st_size >= VIDEO_MAX_SIZE and photo.split('.').pop().lower() in EXT_VIDEO:
+                        logger.error('Skipped [%s] over video size limit' % photo)
+                        continue
+
+                    logger.info('Uploading [%s] to set [%s]' % (photo, display_title))
                     file_path = os.path.join(photo_set, photo)                        
                     photo_id = self.remote.upload(file_path, photo, folder)
                     if photo_id:
