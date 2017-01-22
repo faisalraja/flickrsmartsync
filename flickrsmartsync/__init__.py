@@ -37,6 +37,8 @@ def main():
                         help='ignore image files')
     parser.add_argument('--ignore-ext', type=str, 
                         help='comma separated list of extensions to ignore, e.g. "jpg,png"')
+    parser.add_argument('--fix-missing-description', action='store_true',
+                        help='given a missing set description, replaces it with set title')
     parser.add_argument('--version', action='store_true', 
                         help='output current version: ' + version)
     parser.add_argument('--sync-path', type=str, default=os.getcwd(),

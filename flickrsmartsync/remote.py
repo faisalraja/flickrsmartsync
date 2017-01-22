@@ -154,6 +154,21 @@ class Remote(object):
                 # Make sure it's the one from backup format
                 desc = html_parser.unescape(current_set['description']['_content'])
                 desc = desc.encode('utf-8') if isinstance(desc, unicode) else desc
+
+                if self.cmd_args.fix_missing_description and not desc:
+                    current_set_title = html_parser.unescape(current_set['title']['_content'])
+                    current_set_title = current_set_title.encode('utf-8') if isinstance(current_set_title, unicode) else current_set_title
+                    description_update_args = self.args.copy()
+                    description_update_args.update({
+                        'photoset_id': current_set['id'],
+                        'title': current_set_title,
+                        'description': current_set_title
+                    })
+                    logger.info('Set has no description. Updating it to [%s]...' % current_set_title)
+                    json.loads(self.api.photosets_editMeta(**description_update_args))
+                    logger.info('done')
+                    desc = current_set_title
+
                 if desc:
                     self.photo_sets_map[desc] = current_set['id']
                     title = self.get_custom_set_title(self.cmd_args.sync_path + desc)
