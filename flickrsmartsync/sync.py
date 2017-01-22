@@ -59,7 +59,12 @@ class Sync(object):
                 local_photos = [photo for photo, file_stat in sorted(local_photo_sets[local_photo_set])]
                 # download what doesn't exist locally
                 for photo in [photo for photo in remote_photos if photo not in local_photos]:
-                    self.remote.download(remote_photos[photo], os.path.join(local_photo_set, photo))
+                    if self.cmd_args.dry_run:
+                        logger.info('Would download [%s] to [%s]' % (remote_photos[photo], local_photo_set))
+                    else:
+                        logger.info('Downloading [%s] to [%s]' % (remote_photos[photo], local_photo_set))
+                        self.remote.download(remote_photos[photo], os.path.join(local_photo_set, photo))
+
                 # upload what doesn't exist remotely
                 for photo in [photo for photo in local_photos if photo not in remote_photos]:
                     file_path = os.path.join(local_photo_set, photo)
@@ -80,8 +85,11 @@ class Sync(object):
                         continue
 
                     display_title = self.remote.get_custom_set_title(local_photo_set)
-                    logger.info('Uploading [%s] to set [%s]' % (photo, display_title))
-                    self.remote.upload(file_path, photo, remote_photo_set)
+                    if self.cmd_args.dry_run:
+                        logger.info('Would upload [%s] to set [%s]' % (photo, display_title))
+                    else:
+                        logger.info('Uploading [%s] to set [%s]' % (photo, display_title))
+                        self.remote.upload(file_path, photo, remote_photo_set)
       
         else:
             logger.warning("Unsupported sync option: %s" % self.cmd_args.sync_from)
@@ -106,6 +114,8 @@ class Sync(object):
                     path = os.path.join(folder, photo)
                     if os.path.exists(path):
                         logger.debug('Skipped [%s/%s] already downloaded' % (photo_set, photo))
+                    elif self.cmd_args.dry_run:
+                        logger.info('Would download photo [%s/%s]' % (photo_set, photo))
                     else:
                         logger.info('Downloading photo [%s/%s]' % (photo_set, photo))
                         self.remote.download(photos[photo], path)
@@ -152,6 +162,10 @@ class Sync(object):
                         continue
                     if file_stat.st_size >= VIDEO_MAX_SIZE and photo.split('.').pop().lower() in EXT_VIDEO:
                         logger.error('Skipped [%s] over video size limit' % photo)
+                        continue
+
+                    if self.cmd_args.dry_run:
+                        logger.info('Would upload [%s] to set [%s]' % (photo, display_title))
                         continue
 
                     logger.info('Uploading [%s] to set [%s]' % (photo, display_title))
