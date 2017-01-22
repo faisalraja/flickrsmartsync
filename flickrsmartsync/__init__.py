@@ -29,6 +29,8 @@ def main():
                         help='only sync that path starts with this text, e.g. "2015/06"')
     parser.add_argument('--download', type=str, 
                         help='download the photos from flickr, specify a path or . for all')
+    parser.add_argument('--dry-run', action='store_true',
+                        help='do not download or upload anything')
     parser.add_argument('--ignore-videos', action='store_true', 
                         help='ignore video files')
     parser.add_argument('--ignore-images', action='store_true', 
