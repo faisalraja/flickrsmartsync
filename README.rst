@@ -1,3 +1,5 @@
+    I don't maintain this project anymore since Google Photos provides unlimited high quality photos/videos storage for free
+
 flickrsmartsync - Sync/backup your photos to flickr easily
 **********************************************************
 
